@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: http-echo
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - http-echo-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: http-echo
+        port:
+          number: 8080

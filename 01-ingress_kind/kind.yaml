@@ -1,0 +1,8 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings: ## for docker-proxy port mapping, from the host machine -> docker image of kind cluster
+      - containerPort: 30080 ## kubernetes node port (inside docker)
+        hostPort: 80 ## host machine network
+        listenAddress: "0.0.0.0"

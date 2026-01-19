@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: echo-pod
+  labels:
+    app: echo-app
+spec:
+  containers:
+    - image: mendhak/http-https-echo:38
+      ports:
+        - containerPort: 8080
+      env:
+       - name: HTTP_PORT
+         value: "8080"
+      name: http-echo

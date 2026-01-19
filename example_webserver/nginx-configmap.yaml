@@ -1,0 +1,17 @@
+# nginx-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-html
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Hello</title>
+    </head>
+    <body>
+      <h1>Hello World 👋</h1>
+      <p>Nginx is running inside a kind cluster.</p>
+    </body>
+    </html>
