@@ -10,3 +10,10 @@
 `curl http://<ip>:80/`
 
 `curl -HHost:from.example.com -HUser-Agent:Mozzila/5.3 http://<ip>/some/path/here?id=1&param=test`
+
+
+## running network tooling container
+
+`docker run -it --rm --name netshoot nicolaka/netshoot`
+
+withing the container, curl the http-echo "server"
