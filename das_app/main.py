@@ -3,6 +3,7 @@ import os
 import datetime
 
 APP_LABEL = os.environ.get('APP_LABEL', 'Das APP')
+HTTP_PORT = os.environ.get('HTTP_PORT', 8080)
 
 app = Flask(__name__)
 
@@ -19,4 +20,4 @@ def time():
     return jsonify({'result': datetime.datetime.now()})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=HTTP_PORT)

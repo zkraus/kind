@@ -10,7 +10,7 @@ example app has following enpoints:
 - pick baseimage
 - copy the app onto image
 - install dependencies (flask)
-- expose ports (5000)
+- expose ports (8080)
 - run the app
 
 3. Build the app in docker
@@ -23,16 +23,16 @@ built image is available only in your local docker.
 
 4. run the image with ports and test
 
-`docker run -p 80:5000 das_app:latest`
+`docker run -p 80:8080 das_app:latest`
 
-port forwarding host 80/TCP -> container 5000/TCP (as flask app uses 5000)
+port forwarding host 80/TCP -> container 8080/TCP (as flask app uses 8080)
 
 `curl http://<ip>/`
 `curl http://<ip>/health`
 `curl http://<ip>/time`
 
 5. Add a env variable `APP_LABEL`
-`docker run -p 80:5000 -e APP_LABEL=my_custom_app das_app:latest`
+`docker run -p 80:8080 -e APP_LABEL=my_custom_app das_app:latest`
 and try the `/` endpoint.
 
 6. stop

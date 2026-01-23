@@ -2,7 +2,7 @@ services:
   das_app:
     build: .
     ports:
-      - "80:5000"
+      - "80:8080"
 
     # optional but nice to have for services
     healthcheck:
