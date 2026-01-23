@@ -48,3 +48,12 @@ curl:
 	curl http://127.0.0.1:80/
 
 destroy: kind-stop
+
+
+kind-load:
+	kind load docker-image das_app:0.1.0
+
+das_app_deploy: kind-load
+	kubectl delete deployment http-echo || true
+	kubectl apply -f 04_das_app_deployment.yaml
+	kubect get all
