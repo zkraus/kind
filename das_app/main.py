@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
-
+import os
 import datetime
+
+APP_LABEL = os.environ.get('APP_LABEL', 'Das APP')
 
 app = Flask(__name__)
 
@@ -10,7 +12,7 @@ def health():
 
 @app.route('/')
 def index():
-    return "This is index page"
+    return f"This is index page, hello from {APP_LABEL}"
 
 @app.route('/time')
 def time():

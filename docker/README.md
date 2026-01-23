@@ -48,3 +48,12 @@ remove all unused images
 
 Completely remove all images
 `docker image rm $(docker image list -q)`
+
+
+## detached
+
+Running a container in the background without seeting console.
+
+`-d` or `--detach`:
+
+`docker run -d ...`
