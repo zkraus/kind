@@ -3,5 +3,6 @@ WORKDIR /app
 COPY main.py /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
-EXPOSE 8080
+ENV HTTP_PORT=8080
+EXPOSE $HTTP_PORT
 CMD ["python", "main.py"]
