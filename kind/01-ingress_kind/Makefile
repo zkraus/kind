@@ -11,9 +11,7 @@ kind-start:
 
 kind-ready: kind-running
 	kubectl wait --for jsonpath='{.status.phase}'=Active ns/default
-	kubectl get serviceaccount/default || sleep 10
-	kubectl get serviceaccount/default || sleep 10
-	kubectl get serviceaccount/default
+	kubectl wait --for=create serviceaccount/default --timeout 60s
 
 kind-running: kind-start
 	kind get clusters | grep $(KIND_CLUSTER_NAME)

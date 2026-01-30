@@ -1,12 +1,10 @@
-.PHONY: all setup kind gateway-api istio-install deployment ingress-traffic http-route
+.PHONY: all setup kind gateway-api istio-install deployment ingress-traffic http-route metallb
 
 include kind.mk
 
 .DEFAULT_GOAL: help
 
 all: setup
-
-
 
 
 setup: kind-start gateway-api istio-install deployment ingress-traffic http-route
@@ -17,23 +15,26 @@ gateway-api:
 
 istio-install:
 	istioctl install --set profile=minimal -y
+# 	kubectl label namespace default istio-injection=enabled
 
 deployment:
-	kubectl create ns sample
+	kubectl get ns sample || kubectl create ns sample
 	kubectl apply -f helloworld.yaml -n sample
 	kubectl get pod -n sample
 
-ingress-traffic:
-	kubectl create namespace sample-ingress
+ingress-traffic: metallb
+	kubectl get ns sample-ingress || kubectl create namespace sample-ingress
 	kubectl apply -f sample-gateway.yaml
-	kubectl wait -n sample-ingress --for=condition=programmed gateway sample-gateway
+	kubectl wait -n sample-ingress --for=condition=programmed gateway sample-gateway --timeout 240s
 	kubectl get -n sample-ingress gateway sample-gateway -o jsonpath='{.status.addresses[0].value}'
+
+metallb:
+	make -C ../add_metallb all
 
 http-route:
 	kubectl apply -n sample -f http-route.yaml
 
 curl:
-	ADDRESS:=$(shell kubectl get -n sample-ingress gateway sample-gateway -o jsonpath='{.status.addresses[0].value}')
-	curl -hHost=helloworld.sample.com http://$(ADDRESS):80/hello
+	curl -HHost:helloworld.sample.com http://$(shell kubectl get -n sample-ingress gateway sample-gateway -o jsonpath='{.status.addresses[0].value}'):80/hello
 
 destroy: kind-stop
