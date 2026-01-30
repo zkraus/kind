@@ -1,0 +1,38 @@
+services:
+  das_app_db:
+    build: .
+    ports:
+      - "80:8080"
+
+    # optional but nice to have for services
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    environment:
+    ## "DNS" mongo, referring to the service name
+      - MONGO_URI=mongodb://mongo:27017/das_app_mongo
+      - APP_LABEL=my custom label from compose
+
+  mongo:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      # - ./mongo_data:/data/db:z
+      - ./scripts:/docker-entrypoint-initdb.d:z
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      - MONGO_INITDB_DATABASE=das_app
+
+    restart: unless-stopped
+
+# volumes:
+#   mongo_data:

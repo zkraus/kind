@@ -1,0 +1,14 @@
+FROM python:3.13
+WORKDIR /app
+COPY main.py /app
+COPY requirements.txt /app
+COPY boot.sh /app
+RUN pip install -r requirements.txt
+
+ENV FLASK_APP=main.py
+RUN flask translate compile
+
+
+ENV HTTP_PORT=8080
+EXPOSE $HTTP_PORT
+CMD ["python", "main.py"]
