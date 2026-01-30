@@ -1,0 +1,16 @@
+services:
+  gunicorn_app:
+    build: .
+    ports:
+      - "80:8080"
+
+    # optional but nice to have for services
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # environment:
+    #   APP_LABEL: my custom label from compose

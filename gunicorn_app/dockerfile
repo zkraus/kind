@@ -1,0 +1,15 @@
+FROM python:3.13
+WORKDIR /app
+COPY app/ /app/app
+COPY wsgi.py /app
+COPY requirements.txt /app
+# COPY boot.sh /app
+RUN pip install -r requirements.txt
+
+ENV FLASK_APP=main.py
+
+
+ENV HTTP_PORT=8080
+EXPOSE $HTTP_PORT
+ENV BIND="0.0.0.0:${HTTP_PORT}"
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "wsgi:app"]
