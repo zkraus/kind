@@ -9,14 +9,14 @@ ISTIOD_HELM_RELEASE=default-istiod
 
 
 # istio version supplied to operator when installing
-ISTIO_VERSION=1.26.0
+ISTIO_VERSION=1.28.3
 
 # Istio object in kubernetes
 ISTIO_OBJECT_VERSION=${ISTIO_VERSION}
 
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+current_abs_dir := $(dir $(mkfile_path))
 
 
 istioctl-version:
@@ -48,6 +48,7 @@ sail-operator-install: istio-namespace sail-operator-helm-repo
 sail-operator-istio-objects: sail-operator-install
 	@helm list --namespace ${ISTIO_NAMESPACE} | grep ${SAIL_HELM_RELEASE} && \
 	sed 's/%ISTIO_VERSION%/${ISTIO_OBJECT_VERSION}/' ${current_dir}/istio-objects.yaml | kubectl apply -f -
+	kubectl -n ${ISTIO_NAMESPACE} get istio default -o jsonpath='istio-version={.spec.version}'
 
 sail-operator-istio-objects-uninstall:
 	sed 's/%ISTIO_VERSION%/${ISTIO_OBJECT_VERSION}/' ${current_dir}/istio-objects.yaml | kubectl delete -f - || true
