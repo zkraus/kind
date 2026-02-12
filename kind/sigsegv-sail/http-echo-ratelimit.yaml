@@ -1,0 +1,14 @@
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: gw-rlp
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: http-echo-gateway
+  limits:
+    "global":
+      rates:
+      - limit: 5
+        window: 10s

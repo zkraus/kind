@@ -1,0 +1,12 @@
+apiVersion: sailoperator.io/v1
+kind: Istio
+metadata:
+  name: default
+spec:
+  namespace: istio-system
+  updateStrategy:
+    type: InPlace
+  values:
+    pilot:
+      autoscaleMin: 2
+  version: v%ISTIO_VERSION%

@@ -1,0 +1,4 @@
+
+kubect-version:
+	kubect version
+

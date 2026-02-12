@@ -1,0 +1,42 @@
+.PHONY: all kind-start
+
+include make_modules/kind.mk
+include make_modules/gateway_api.mk
+
+all: kind-start gateway-api istio-install metallb kuadrant keycloak testsuite-namespace
+
+
+istio-install: gateway-api
+	istioctl install --set profile=minimal -y
+# 	kubectl label namespace default istio-injection=enabled
+
+
+cert-manager: 
+	kubectl get ns cert-manager || \
+	( helm repo add jetstack https://charts.jetstack.io --force-update && \
+	helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.15.3 --set crds.enabled=true )
+
+kuadrant-install: cert-manager istio-install gateway-api
+	kubectl get ns kuadrant-system || \
+	( helm repo add kuadrant https://kuadrant.io/helm-charts/ --force-update && \
+	helm install kuadrant-operator kuadrant/kuadrant-operator --create-namespace --namespace kuadrant-system && \
+	kubectl wait pod --all --for=condition=Ready -n kuadrant-system --timeout 5m )
+
+testsuite-namespace:
+	kubectl create namespace kuadrant
+
+kuadrant: kuadrant-install
+	kubectl apply -f kuadrant-resource.yaml
+	kubectl -n kuadrant-system wait --for=condition=Ready kuadrant kuadrant
+
+metallb: kind-start
+	make -C ../add_metallb all
+
+
+destroy: kind-stop
+
+keycloak:
+	kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.5.2/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
+	kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.5.2/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
+	kubectl create namespace keycloak
+	kubectl -n keycloak apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.5.2/kubernetes/kubernetes.yml
