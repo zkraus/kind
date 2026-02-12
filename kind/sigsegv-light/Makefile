@@ -24,6 +24,7 @@ route: deployment gateway
 
 setup: deployment gateway route
 	kubectl wait --for=condition=Ready pod --all --timeout 120s
+	kubectl get pod "$(shell kubectl get pods | grep 'http-echo-gateway' | cut -f 1 -d ' ')" -o json | jq ".spec.containers[].image"
 
 
 
