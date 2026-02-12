@@ -4,7 +4,7 @@ CERT_MANAGER_HELM_REPO=jetstack
 CERT_MANAGER_HELM_REPO_URL=https://charts.jetstack.io
 CERT_MANAGER_HELM_RELEASE=cert-manager
 
-cert-manager: cert-manager-ns cert-manger-helm-repo cert-manager-install
+cert-manager: cert-manager-ns cert-manager-helm-repo cert-manager-install
 
 cert-manager-ns:
 	@kubectl get ns ${CERT_MANAGER_NAMESPACE} || \

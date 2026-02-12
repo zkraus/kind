@@ -2,14 +2,16 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
+CLUSTER_CONTAINER_NAME=kind
+
 METALLB_NAMESPACE=metallb-system
 METALLB_URL_MANIFEST=https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
 
 METALLB_LBPOOL_NAME=lb-pool
 
 ## VERY LIMITTED auto network range detection
-KIND_NETWORK_ADDRESS=$(shell docker network inspect kind | jq '.[0].IPAM.Config.[].Subnet' | grep '\.' )
-KIND_NETWORK_ADDRESS_PREFIX=$(shell echo ${KIND_NETWORK_ADDRESS}| sed -e 's/\.0\/16//' -e 's/"//g')
+KIND_NETWORK_ADDRESS=$(shell docker network inspect ${CLUSTER_CONTAINER_NAME} | jq '.[0].IPAM.Config.[].Subnet' | grep '\.' )
+KIND_NETWORK_ADDRESS_PREFIX=$(shell echo ${KIND_NETWORK_ADDRESS}| sed -e 's/\.0\/\(16\|24\)//' -e 's/"//g')
 
 metallb-install:
 	kubectl get namespace ${METALLB_NAMESPACE} || \
@@ -33,4 +35,4 @@ metallb-address-pool-destroy:
 	sed 's/%NETWORK_ADDRESS_PREFIX%/${KIND_NETWORK_ADDRESS_PREFIX}/g' ${current_dir}/metallb-pool.yaml | kubectl delete -f - || true
 
 
-metallb: metallb metallb-address-pool
+metallb: metallb-install metallb-address-pool

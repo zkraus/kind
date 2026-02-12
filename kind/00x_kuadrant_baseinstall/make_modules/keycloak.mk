@@ -15,14 +15,14 @@ keycloak-namespace-delete:
 	kubectl delete namespace ${KEYCLOAK_NAMESPACE} || true
 
 
-keycloak-keycloaks-install:
+keycloak-keycloaks-install: keycloak-namespace
 	kubectl apply -f ${KEYCLOAK_URL_KEYCLOAKS}
 
 keycloak-keycloaks-uninstall:
 	kubectl delete -f ${KEYCLOAK_URL_KEYCLOAKS}
 
 
-keycloak-realimports-install:
+keycloak-realimports-install: keycloak-keycloaks-install
 	kubectl apply -f  ${KEYCLOAK_URL_REALIMPORTS}
 
 keycloak-realimports-uninstall:
@@ -30,7 +30,7 @@ keycloak-realimports-uninstall:
 
 
 
-keycloak-resource-install:
+keycloak-resource-install: keycloak-realimports-install
 	kubectl -n keycloak apply -f ${KEYCLOAK_URL_RESOURCES}
 
 keycloak-resource-uninstall:
@@ -38,6 +38,8 @@ keycloak-resource-uninstall:
 
 
 keycloak-install: keycloak-namespace keycloak-keycloaks-install keycloak-realimports-install keycloak-resource-install
+
+keycloak: keycloak-install
 
 keycloak-uninstall:	keycloak-resource-uninstall keycloak-realimports-uninstall keycloak-keycloaks-uninstall keycloak-namespace-delete  
 

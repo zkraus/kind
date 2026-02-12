@@ -30,7 +30,7 @@ kind-ensure:
 
 kind-start: 
 	@kind get clusters | grep $(KIND_CLUSTER_NAME) || \
-		kind create cluster --name $(KIND_CLUSTER_NAME) $(KIND_CONF)
+		kind create cluster --name $(KIND_CLUSTER_NAME) --wait 120s $(KIND_CONF)
 
 
 kind-ready:
@@ -41,3 +41,4 @@ kind-ready:
 kind-load: kind-ensure 
 	kind load docker-image --name $(KIND_CLUSTER_NAME) ${IMG}
 
+kind: kind-start
