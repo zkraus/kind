@@ -1,0 +1,61 @@
+---
+# ServiceAccount - identity for the operator pod
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dasapp-operator
+  namespace: default
+
+---
+# ClusterRole - defines what permissions the operator needs
+# This allows the operator to manage DasApps, Deployments, Services, and Pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dasapp-operator
+rules:
+  # Permission to watch/create/update/delete DasApp custom resources
+  - apiGroups: ["dasapp.example.com"]
+    resources: ["dasapps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Permission to update DasApp status
+  - apiGroups: ["dasapp.example.com"]
+    resources: ["dasapps/status"]
+    verbs: ["get", "update", "patch"]
+
+  # Permission to manage Deployments
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Permission to manage Services
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Permission to read Pods (for health checks)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+  # Kopf needs to create events for logging
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+# ClusterRoleBinding - grants the ClusterRole to the ServiceAccount
+# This says: "dasapp-operator ServiceAccount can use dasapp-operator ClusterRole"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dasapp-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dasapp-operator
+subjects:
+  - kind: ServiceAccount
+    name: dasapp-operator
+    namespace: default

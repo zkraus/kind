@@ -1,0 +1,14 @@
+---
+# Example DasApp custom resource
+# Create this to test the operator
+apiVersion: dasapp.example.com/v1
+kind: DasApp
+metadata:
+  name: my-das-app
+  namespace: default
+spec:
+  replicas: 2
+  label: "Hello from Operator!"
+  image: das_app:latest  # Make sure this image exists in your cluster
+  port: 8080
+  serviceType: ClusterIP

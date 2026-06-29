@@ -1,0 +1,31 @@
+---
+# Deployment for the operator itself
+# This runs the operator as a pod in the cluster
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dasapp-operator
+  namespace: default
+spec:
+  replicas: 1  # Only need one operator instance
+  selector:
+    matchLabels:
+      app: dasapp-operator
+  template:
+    metadata:
+      labels:
+        app: dasapp-operator
+    spec:
+      # Use the ServiceAccount we created (grants permissions)
+      serviceAccountName: dasapp-operator
+      containers:
+        - name: operator
+          image: dasapp-operator:latest
+          # For local testing with kind:
+          # Build: docker build -t dasapp-operator:latest .
+          # Load into kind: kind load docker-image dasapp-operator:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # Tell kopf to watch all namespaces
+            - name: WATCH_NAMESPACE
+              value: ""

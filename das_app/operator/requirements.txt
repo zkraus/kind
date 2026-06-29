@@ -1,0 +1,7 @@
+# Kopf - Kubernetes Operator Pythonic Framework
+# Main library for building operators in Python
+kopf>=1.36.0
+
+# Kubernetes Python client
+# Used to interact with Kubernetes API (create Deployments, Services, etc.)
+kubernetes>=27.2.0
