@@ -2,6 +2,39 @@
 
 Small Flask app that sends messages to a Kafka topic and shows the latest ones.
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Docker Compose Network                  │
+│                                                              │
+│  ┌──────────────────────┐          ┌───────────────────┐   │
+│  │   Flask App (8000)   │          │   Kafka Broker    │   │
+│  │                      │          │   (kraft mode)    │   │
+│  │  GET  /              │          │                   │   │
+│  │  GET  /health        │          │   Topic: "peek"   │   │
+│  │  POST /produce       │◄────────►│                   │   │
+│  │  GET  /messages      │          │   Port: 9092      │   │
+│  │                      │          │                   │   │
+│  └──────────────────────┘          └───────────────────┘   │
+│           ▲                                                  │
+│           │                                                  │
+└───────────┼──────────────────────────────────────────────────┘
+            │
+            │ Port: 8000
+            ▼
+     ┌──────────────┐
+     │   Client     │
+     │   (curl)     │
+     └──────────────┘
+```
+
+**Flow:**
+1. Client sends POST to `/produce` with message
+2. Flask app produces message to Kafka topic "peek"
+3. Client requests GET `/messages`
+4. Flask app consumes last 10 messages from Kafka and returns them
+
 ## Build custom app
 
 - `main.py`: Flask app with `/health`, `POST /produce` and `GET /messages`
