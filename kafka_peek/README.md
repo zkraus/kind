@@ -105,7 +105,7 @@ kafka_peek/
 │   ├── app.js       # Frontend logic (no Kafka dependency)
 │   └── Dockerfile   # Nginx alpine image
 ├── compose.yaml     # Orchestrates kafka, backend, frontend, and kafka-ui
-├── .env             # Port configuration (KAFKA_UI_PORT, BACKEND_PORT, FRONTEND_PORT)
+├── .env.example     # Template configuration (copy to .env)
 └── Makefile         # Commands: up, down, logs, test
 ```
 
@@ -136,6 +136,9 @@ kafka_peek/
 **Requirements:** podman/docker with compose
 
 ```bash
+# Create your local configuration from the committed template
+cp .env.example .env
+
 # Build and start all services (kafka, backend, frontend, kafka-ui)
 make up
 
@@ -151,13 +154,22 @@ make down
 
 ### Environment Variables
 
-Port configuration can be customized via `.env` file:
+All configuration lives in a `.env` file next to `compose.yaml` (copy the
+committed `.env.example`). Compose reads it automatically for `${VAR}`
+interpolation and the backend also receives it via `env_file:`. Change a value
+and restart — no image rebuild is needed.
 
 ```bash
-KAFKA_UI_PORT=8080      # Kafka UI web console
-BACKEND_PORT=8000       # Flask backend API
-FRONTEND_PORT=3000      # Frontend web UI
+KAFKA_BROKER=kafka:9092                              # Broker address (internal network name)
+KAFKA_TOPIC=peek                                     # Topic used by the producer and consumer
+KAFKA_IMAGE=quay.io/strimzi/kafka:latest-kafka-3.8.0 # Kafka image tag
+KAFKA_UI_PORT=8080                                   # Kafka UI web console
+BACKEND_PORT=8000                                    # Flask backend API
+FRONTEND_PORT=3000                                   # Frontend web UI
 ```
+
+> `.env` is gitignored; `.env.example` is committed with safe defaults. Never
+> commit real secrets — commit the template instead.
 
 ## Access Points
 
