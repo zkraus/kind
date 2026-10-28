@@ -20,6 +20,16 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       KAFKA_BROKER: kafka:9092
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       kafka:
         condition: service_healthy
@@ -29,7 +39,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   kafka-ui:
     image: docker.io/provectuslabs/kafka-ui:v0.7.2
