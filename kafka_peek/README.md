@@ -131,8 +131,12 @@ kafka_peek/
 │   ├── style.css    # Styling
 │   ├── app.js       # Frontend logic (no Kafka dependency)
 │   └── Dockerfile   # Nginx alpine image
-├── compose.yaml     # Orchestrates kafka, backend, frontend, and kafka-ui
-├── .env             # Port configuration (KAFKA_UI_PORT, BACKEND_PORT, FRONTEND_PORT)
+├── worker/          # Consumer microservice
+│   ├── main.py      # Consumer group processing loop
+│   ├── requirements.txt  # kafka-python
+│   └── Dockerfile   # Python 3.12 slim image
+├── compose.yaml     # Orchestrates kafka, backend, frontend, worker, kafka-ui
+├── .env.example     # Configuration template
 └── Makefile         # Commands: up, down, logs, test
 ```
 
@@ -149,6 +153,14 @@ kafka_peek/
 - `POST /produce` - Send message to Kafka
 - `GET /messages` - Retrieve last 10 messages
 
+**Worker Microservice**
+- Long-running consumer in a consumer group (`peek-workers`)
+- Processes records from `peek` topic (3 partitions)
+- Enriches records with processing metadata
+- Produces results to `peek.processed` topic
+- Sends alerts to `alerts` topic when value exceeds threshold
+- Horizontally scalable (`--scale worker=3`)
+- Demonstrates partition assignment and rebalancing
 **Learning (N/A)**
 - Not and endpoint
 - Actual purpose of this project
@@ -162,6 +174,43 @@ kafka_peek/
 - View cluster information and broker details
 
 **Note:** Frontend communicates with Kafka only through the backend API - no direct Kafka dependency.
+
+## Consumer Groups, Partitions, and Offsets
+
+The **worker microservice** demonstrates core Kafka consumption concepts:
+
+**Consumer Groups:**
+- Workers consume as part of the `peek-workers` consumer group
+- Each consumer in a group gets a subset of partitions
+- Kafka tracks progress per group, not per consumer
+- If a consumer dies, its partitions are reassigned to survivors (rebalancing)
+
+**Partitions:**
+- The `peek` topic has 3 partitions for parallel processing
+- Messages with the same key always go to the same partition (preserving order per sensor)
+- Each partition is assigned to one consumer in the group
+- Scaling to 3 workers distributes partitions 1:1
+
+**Offsets:**
+- Each partition has a sequential offset (0, 1, 2...)
+- The consumer group commits its position after processing
+- On restart, consumers resume from the last committed offset (not from the beginning)
+- View committed offsets and lag in Kafka UI under Consumer Groups
+
+**Try it:**
+```bash
+# Start with 1 worker, produce some messages
+make up
+
+# Scale to 3 workers - watch partitions redistribute
+podman compose up --scale worker=3 -d
+
+# Kill one worker - watch survivors pick up its partitions
+podman compose stop worker
+
+# Check logs to see partition assignments
+podman compose logs worker
+```
 
 ## Building and Running
 
@@ -191,9 +240,14 @@ make down
 Configuration can be customized via `.env` file:
 
 ```bash
+
 KAFKA_IMAGE=quay.io/strimzi/kafka:latest-kafka-3.8.0
 KAFKA_BROKER=kafka:9092
 KAFKA_TOPIC=peek
+PROCESSED_TOPIC=peek.processed
+ALERTS_TOPIC=alerts
+GROUP_ID=peek-workers
+THRESHOLD=25.0
 BACKEND_PORT=8000
 FRONTEND_PORT=3000
 KAFKA_UI_PORT=8080

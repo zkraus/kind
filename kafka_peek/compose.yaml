@@ -4,7 +4,7 @@ services:
     command:
       - sh
       - -c
-      - "bin/kafka-storage.sh format -t $(bin/kafka-storage.sh random-uuid) -c config/kraft/server.properties && bin/kafka-server-start.sh config/kraft/server.properties --override advertised.listeners=PLAINTEXT://kafka:9092"
+      - "bin/kafka-storage.sh format -t $(bin/kafka-storage.sh random-uuid) -c config/kraft/server.properties && bin/kafka-server-start.sh config/kraft/server.properties --override advertised.listeners=PLAINTEXT://kafka:9092 --override num.partitions=3"
     environment:
       LOG_DIR: /tmp/logs
     healthcheck:
@@ -38,6 +38,16 @@ services:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
+        condition: service_healthy
+
+  worker:
+    build: ./worker
+    env_file:
+      - .env
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+    depends_on:
+      kafka:
         condition: service_healthy
 
   kafka-ui:
