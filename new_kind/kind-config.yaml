@@ -1,0 +1,8 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30000      # [F] must match nodePort in d-echo.yaml
+        listenAddress: "0.0.0.0"
+        hostPort: 2000            # host PC / Mac -> podman port mapping (curl localhost:2000)
