@@ -1,0 +1,19 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: g-echo                 # [G] must match HTTPRoute parentRefs.name
+  namespace: default           # [H] must match HTTPRoute namespace (allowedRoutes: Same)
+spec:
+  gatewayClassName: istio      # provided by `istioctl install`, do not rename
+  listeners:
+    - name: http               # [I] optional target of HTTPRoute parentRefs.sectionName
+      port: 80                 # port the LoadBalancer Service exposes, NOT a nodePort
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same           # only HTTPRoutes in [H] may attach
+# Istio auto-creates Deployment + Service "g-echo-istio" from this Gateway.
+# Service type defaults to LoadBalancer - that default is what we want here,
+# so no "networking.istio.io/service-type" annotation is set.
+# EXTERNAL-IP stays <pending> until a LoadBalancer provider (cloud-provider-kind)
+# is running on the host.

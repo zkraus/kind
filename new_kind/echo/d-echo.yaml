@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: d-echo             # Deployment name, independent of any label below
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p-echo          # [A] must match [B] - Deployment adopts its own pods
+  template:
+    metadata:
+      labels:
+        app: p-echo        # [B] pod label - must match [A] and [C]
+    spec:
+      containers:
+        - name: c-echo     # container name, not referenced by any selector
+          image: hashicorp/http-echo
+          ports:
+            - containerPort: 5678   # [D] informational only, must match [E]
+

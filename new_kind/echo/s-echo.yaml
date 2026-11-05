@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s-echo             # Service name, used for DNS, not for pod matching
+spec:
+  type: NodePort
+  selector:
+    app: p-echo            # [C] must match [B] - picks pods, NOT the Deployment name
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80             # Service port inside the cluster (normal use)
+      targetPort: 5678     # [E] port the container listens on, must match [D]
+      nodePort: 30000      # [F] must match containerPort in kind-cluster.yaml
